@@ -3,22 +3,25 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class GraphAttentionLayer(nn.Module):
     """
     Simple GAT layer, similar to https://arxiv.org/abs/1710.10903
     """
 
-    def __init__(self, in_features, out_features, dropout, alpha, concat=True):
+    def __init__(self, device,in_features, out_features, dropout, alpha, concat=True):
         super(GraphAttentionLayer, self).__init__()
         self.dropout = dropout
         self.in_features = in_features
         self.out_features = out_features
         self.alpha = alpha
         self.concat = concat
-
+        self.device = device
+        
+#        self.W = nn.Parameter(nn.init.xavier_uniform_(torch.tensor((in_features, out_features),dtype=torch.float64,device=self.device, requires_grad=True),gain=np.sqrt(2.0)))
+#        self.a = nn.Parameter(nn.init.xavier_uniform_(torch.tensor((2*out_features, 1),dtype=torch.float64,device = self.device,requires_grad=True),gain=np.sqrt(2.0)))
         self.W = nn.Parameter(nn.init.xavier_uniform(torch.Tensor(in_features, out_features).type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor), gain=np.sqrt(2.0)), requires_grad=True)
         self.a = nn.Parameter(nn.init.xavier_uniform(torch.Tensor(2*out_features, 1).type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor), gain=np.sqrt(2.0)), requires_grad=True)
+
 
         self.leakyrelu = nn.LeakyReLU(self.alpha)
 

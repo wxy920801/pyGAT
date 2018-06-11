@@ -19,15 +19,15 @@ from models import GAT
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables CUDA training.')
 parser.add_argument('--fastmode', action='store_true', default=False, help='Validate during training pass.')
-parser.add_argument('--seed', type=int, default=42, help='Random seed.')
+parser.add_argument('--seed', type=int, default=4, help='Random seed.')
 parser.add_argument('--epochs', type=int, default=10000, help='Number of epochs to train.')
 parser.add_argument('--lr', type=float, default=0.005, help='Initial learning rate.')
 parser.add_argument('--weight_decay', type=float, default=5e-4, help='Weight decay (L2 loss on parameters).')
 parser.add_argument('--hidden', type=int, default=8, help='Number of hidden units.')
-parser.add_argument('--nb_heads', type=int, default=8, help='Number of head attentions.')
-parser.add_argument('--dropout', type=float, default=0.6, help='Dropout rate (1 - keep probability).')
+parser.add_argument('--nb_heads', type=int, default=3, help='Number of head attentions.')
+parser.add_argument('--dropout', type=float, default=0.2, help='Dropout rate (1 - keep probability).')
 parser.add_argument('--alpha', type=float, default=0.2, help='Alpha for the leaky_relu.')
-parser.add_argument('--patience', type=int, default=100, help='Patience')
+parser.add_argument('--patience', type=int, default=10, help='Patience')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -40,9 +40,9 @@ if args.cuda:
 
 # Load data
 adj, features, labels, idx_train, idx_val, idx_test = load_data()
-
+device = torch.device("cuda:1")
 # Model and optimizer
-model = GAT(nfeat=features.shape[1], nhid=args.hidden, nclass=int(labels.max()) + 1, dropout=args.dropout, nheads=args.nb_heads, alpha=args.alpha)
+model = GAT(device,nfeat=features.shape[1], nhid=args.hidden, nclass=int(labels.max()) + 1, dropout=args.dropout, nheads=args.nb_heads, alpha=args.alpha)
 optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
 if args.cuda:
